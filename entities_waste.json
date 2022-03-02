@@ -1,0 +1,69 @@
+{
+    "actionType": "append",
+    "entities": [
+        {
+            "id": "urn:ngsi:WasteContainer:DIN20211222001",
+            "type": "WasteContainer",
+            "location": {
+                "type": "geo:json",
+                "value": {
+                    "type": "Point",
+                    "coordinates": [
+                        -75.5778143652738,
+                        6.242176985919126
+                    ]
+                },
+                "metadata": {}
+            },
+            "operationalStatus": {
+                "type": "Text",
+                "value": "CONNECTED",
+                "metadata": {
+                    "timestamp": {
+                        "type": "DateTime",
+                        "value": "2022-01-27T17:07:00.000Z"
+                    }
+                }
+            },
+            "TimeInstant": {
+                "type": "DateTime",
+                "value": "2022-02-26T18:00:00.000Z",
+                "metadata": {}
+            },
+            "time_index": {
+                "type": "DateTime",
+                "value": "2022-02-26T18:00:00.000Z"
+            },
+            "source": {
+                "type": "Text",
+                "value": "dingtek",
+                "metadata": {}
+            },
+            "binFillingLevel": {
+                "type": "Number",
+                "value": 0.65,
+                "metadata": {
+                    "dateObserved": {
+                        "type": "DateTime",
+                        "value": "2022-01-27T17:07:00.000Z"
+                    },
+                    "description": {
+                        "type": "Text",
+                        "value": "bin Filling Level"
+                    },
+                    "ranges": {
+                        "type": "Text",
+                        "value": "0 to 100"
+                    }
+                }
+                
+            },
+            "weight": {
+                "type": "Number",
+                "value": 0.65,
+                "metadata": {}
+                
+            }
+        }
+    ]
+}
