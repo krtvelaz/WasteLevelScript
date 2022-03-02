@@ -60,7 +60,7 @@
             },
             "weight": {
                 "type": "Number",
-                "value": 0.65,
+                "value": 1100,
                 "metadata": {}
                 
             }

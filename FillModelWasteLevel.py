@@ -4,6 +4,7 @@ import json as js
 from datetime import datetime, timezone
 import requests as rq
 import os
+import pytz
 from urllib3.exceptions import InsecureRequestWarning
 rq.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
@@ -47,6 +48,7 @@ def EnviarPost(data : dict, token):
 
 # Generar Valor siguiente para alimentar modelo
 def ActualizarBinFillingLevel(binFillingLevel, windowStart, windowEnd, WeekDay1, WeekDay2):
+    tz = pytz.timezone('America/Bogota')
     hoy = datetime.now()
     Hora_TF = (hoy.hour) >= windowStart and (hoy.hour) < windowEnd
     Dia_TF = (hoy.isoweekday()) == 2 and (hoy.isoweekday()) == 5
