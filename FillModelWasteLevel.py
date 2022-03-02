@@ -131,10 +131,7 @@ def IniciarDispositivos():
                 {'id': registro.id, 'status': status_code.status_code, 'content': status_code.content, 'lastModifiedDate': registro.LastModifiedDate})
 
             config.to_json(path+"deviceWasteConfig.json", orient='records')
-
-        return status_table
     except:
         with open("Logs.txt", "a") as file:
             file.write(Momento+" {No se pudo Continuar con el proceso } \n")
 
-        return Momento+" {No se pudo Continuar con la proceso}"
