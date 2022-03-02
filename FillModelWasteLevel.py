@@ -95,10 +95,11 @@ def ReiniciarDispositivos():
 
 # Iniciar proceso de generación y envío de datos al Orion
 def IniciarDispositivos():
+    tz = pytz.timezone('America/Bogota')
     config = pd.read_json(path+"deviceWasteConfig.json")
     config.binFillingLevel = config.apply(lambda x: ActualizarBinFillingLevel(
         x.binFillingLevel, x.windowStart, x.windowEnd, x.WeekDay1, x.WeekDay2), axis=1)
-    config.LastModifiedDate = datetime.now().isoformat()[:-3]+'Z'
+    config.LastModifiedDate = datetime.now(tz).isoformat()[:-3]+'Z'
     TOKEN = Auth()
     status_table = []
     status_code = 0
