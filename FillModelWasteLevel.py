@@ -16,7 +16,7 @@ AumentoNormal = 0.003571429
 AumentoAfan = 0.004464286
 AumentoNormalNoc = 0.00125
 AumentoAfanNoc = 0.0025
-Momento = datetime.now().replace(tzinfo=pytz.timezone("America/Bogota"))
+Momento = datetime.now(pytz.timezone("America/Bogota"))
 
 # funcion para autenticarse en Orion
 
@@ -98,7 +98,7 @@ def ActualizarArchivo(registro):
 def ReiniciarDispositivos():
     config = pd.read_json(path+"deviceWasteConfig.json")
     config.binFillingLevel = 0
-    config.LastModifiedDate = datetime.now().isoformat()[:-3]+'Z'
+    config.LastModifiedDate =  Momento.isoformat()[:-9]+'Z'
     config.to_json(path+"deviceWasteConfig.json", orient='records')
 
 
