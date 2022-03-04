@@ -1,1 +1,1 @@
-python -c 'import FillModelWasteLevel; print(FillModelWasteLevel.IniciarDispositivos())'
+python3 -c 'import FillModelWasteLevel; FillModelWasteLevel.IniciarDispositivos()'

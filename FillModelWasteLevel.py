@@ -4,6 +4,7 @@ import json as js
 from datetime import datetime, timezone
 import requests as rq
 import os
+import pytz
 from urllib3.exceptions import InsecureRequestWarning
 rq.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
@@ -15,8 +16,11 @@ AumentoNormal = 0.003571429
 AumentoAfan = 0.004464286
 AumentoNormalNoc = 0.00125
 AumentoAfanNoc = 0.0025
+Momento = datetime.now(pytz.timezone("America/Bogota"))
 
 # funcion para autenticarse en Orion
+
+
 def Auth():
     url = 'https://medellinciudadinteligente.co/keycloak/auth/realms/fiware-server/protocol/openid-connect/token'
     headers = {
@@ -33,7 +37,7 @@ def Auth():
 
 
 # funcion para alimentar modelo de WasteLevel
-def EnviarPost(data : dict, token):
+def EnviarPost(data: dict, token):
     url = "https://medellinciudadinteligente.co/orion/v2/op/update"
     headers = {
         'fiware-service': 'WasteLevel',
@@ -46,27 +50,34 @@ def EnviarPost(data : dict, token):
     return response
 
 # Generar Valor siguiente para alimentar modelo
+
+
 def ActualizarBinFillingLevel(binFillingLevel, windowStart, windowEnd, WeekDay1, WeekDay2):
-    hoy = datetime.now()
-    Hora_TF = (hoy.hour) >= windowStart and (hoy.hour) < windowEnd
-    Dia_TF = (hoy.isoweekday()) == 2 and (hoy.isoweekday()) == 5
+    hoy = Momento
+    Hora = hoy.hour
+    Dia = hoy.isoweekday()
+    Hora_TF = (Hora) >= windowStart and (Hora) < windowEnd
+    Dia_TF = (Dia) == WeekDay1 and (Dia) == WeekDay2
     Aumento = 0
-    if(Dia_TF+1 == WeekDay1 or Dia_TF+1 == WeekDay2):
-        if (Hora_TF > 17 and Hora_TF >= 23) or (Hora_TF >= 0 and Hora_TF < 4):
+    if(Dia+1 == WeekDay1 or Dia+1 == WeekDay2):
+        if (Hora > 17 and Hora >= 23) or (Hora >= 0 and Hora < 4):
             Aumento = AumentoAfanNoc
         else:
             Aumento = AumentoAfan
     else:
-        if (Hora_TF > 17 and Hora_TF >= 23) or (Hora_TF >= 0 and Hora_TF < 4):
+        if (Hora > 17 and Hora >= 23) or (Hora >= 0 and Hora < 4):
             Aumento = AumentoNormalNoc
         else:
             Aumento = AumentoNormal
 
-    binFillingLevel += Aumento
+    binFillingLevel = 0 if(Hora_TF and Dia_TF) else binFillingLevel+Aumento
 
     return binFillingLevel
 
-#Formatear el Payload para enviar a Orion
+
+# Formatear el Payload para enviar a Orion
+
+
 def ActualizarArchivo(registro):
     ArchivoJson = open(path+'entities_waste.json')
     requestJson = js.load(ArchivoJson)
@@ -83,37 +94,43 @@ def ActualizarArchivo(registro):
     return requestJson
 
 
-# Reiniciar el valor de los dispostivos 
+# Reiniciar el valor de los dispostivos
 def ReiniciarDispositivos():
     config = pd.read_json(path+"deviceWasteConfig.json")
     config.binFillingLevel = 0
-    config.LastModifiedDate = datetime.now().isoformat()[:-3]+'Z'
+    config.LastModifiedDate = Momento.isoformat()[:-9]+'Z'
     config.to_json(path+"deviceWasteConfig.json", orient='records')
 
 
 # Iniciar proceso de generación y envío de datos al Orion
 def IniciarDispositivos():
-    config = pd.read_json(path+"deviceWasteConfig.json")
-    config.binFillingLevel = config.apply(lambda x: ActualizarBinFillingLevel(
-        x.binFillingLevel, x.windowStart, x.windowEnd, x.WeekDay1, x.WeekDay2), axis=1)
-    config.LastModifiedDate = datetime.now().isoformat()[:-3]+'Z'
-    TOKEN = Auth()
-    status_table = []
-    status_code = 0
-    print('cargando...')
-    for registro in config.itertuples():
-        datos = ActualizarArchivo(registro)
-        respuesta = EnviarPost(datos, TOKEN)
-        status_code = respuesta
-        if(status_code != 204):
-            TOKEN = Auth()
+
+    try:
+        config = pd.read_json(path+"deviceWasteConfig.json")
+        config.binFillingLevel = config.apply(lambda x: ActualizarBinFillingLevel(
+            x.binFillingLevel, x.windowStart, x.windowEnd, x.WeekDay1, x.WeekDay2), axis=1)
+        config.LastModifiedDate = Momento.isoformat()[:-9]+'Z'
+
+        TOKEN = Auth()
+        status_table = []
+        status_code = 0
+        print('cargando...')
+        for registro in config.itertuples():
+            datos = ActualizarArchivo(registro)
             respuesta = EnviarPost(datos, TOKEN)
             status_code = respuesta
-        status_table.append(
-            {'id': registro.id, 'status': status_code.status_code, 'content': status_code.content})
+            if(status_code != 204):
+                TOKEN = Auth()
+                respuesta = EnviarPost(datos, TOKEN)
+                status_code = respuesta
+                with open("Logs.txt", "a") as file:
+                    file.write("{'id':" + str(registro.id) + ", 'status': " + str(status_code.status_code) + ", 'content': " + str(
+                        status_code.content) + ",'lastModifiedDate': " + str(registro.LastModifiedDate) + " } \n")
 
-        config.to_json(path+"deviceWasteConfig.json", orient='records')
+            status_table.append(
+                {'id': registro.id, 'status': status_code.status_code, 'content': status_code.content, 'lastModifiedDate': registro.LastModifiedDate})
 
-    return status_table
-
-IniciarDispositivos()
+            config.to_json(path+"deviceWasteConfig.json", orient='records')
+    except:
+        with open("Logs.txt", "a") as file:
+            file.write(Momento+" {No se pudo Continuar con el proceso } \n")
