@@ -134,3 +134,7 @@ def IniciarDispositivos():
     except:
         with open("Logs.txt", "a") as file:
             file.write(Momento+" {No se pudo Continuar con el proceso } \n")
+
+
+
+IniciarDispositivos()
