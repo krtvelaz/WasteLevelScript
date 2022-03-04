@@ -116,4 +116,4 @@ def IniciarDispositivos():
 
     return status_table
 
-
+IniciarDispositivos()
