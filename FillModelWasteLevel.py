@@ -9,7 +9,7 @@ from urllib3.exceptions import InsecureRequestWarning
 rq.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
 # Ubicacion de los Archivos de configuración
-path = "./"
+path = os.getcwd()+"/"
 
 # Variables de Aumento
 AumentoNormal = 0.003571429
@@ -133,8 +133,8 @@ def IniciarDispositivos():
             config.to_json(path+"deviceWasteConfig.json", orient='records')
     except:
         with open("Logs.txt", "a") as file:
-            file.write(str(Momento)+" {No se pudo Continuar con el proceso } \n")
+            file.write(Momento.strftime("%y/%m/%d, %H:%M:%S")+" {No se pudo Continuar con el proceso } \n")
 
 
-
+print(path)
 IniciarDispositivos()
