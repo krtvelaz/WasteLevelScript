@@ -27,8 +27,8 @@ def Auth():
         'Content-Type': 'application/x-www-form-urlencoded'
     }
     data = {
-        'username': 'admin-user',
-        'password': 'admin-user',
+        'username': 'admin',
+        'password': 'pass',
         'grant_type': 'password',
         'client_id': 'fiware-login'
     }
@@ -57,21 +57,22 @@ def ActualizarBinFillingLevel(binFillingLevel, windowStart, windowEnd, WeekDay1,
     Hora = hoy.hour
     Dia = hoy.isoweekday()
     Hora_TF = (Hora) >= windowStart and (Hora) < windowEnd
-    Dia_TF = (Dia) == WeekDay1 and (Dia) == WeekDay2
+    Dia_TF = (Dia) == WeekDay1 or (Dia) == WeekDay2
     Aumento = 0
     if(Dia+1 == WeekDay1 or Dia+1 == WeekDay2):
-        if (Hora > 17 and Hora >= 23) or (Hora >= 0 and Hora < 4):
+        if (Hora > 17 and Hora <= 23) or (Hora >= 0 and Hora < 4):
             Aumento = AumentoAfanNoc
         else:
             Aumento = AumentoAfan
     else:
-        if (Hora > 17 and Hora >= 23) or (Hora >= 0 and Hora < 4):
+        if (Hora > 17 and Hora <= 23) or (Hora >= 0 and Hora < 4):
             Aumento = AumentoNormalNoc
         else:
             Aumento = AumentoNormal
 
-    binFillingLevel = 0 if(Hora_TF and Dia_TF) else binFillingLevel+Aumento
-
+    binFillingLevel = 0 if(Hora_TF and Dia_TF and binFillingLevel>1) else binFillingLevel+Aumento
+    binFillingLevel = 1.1 if(binFillingLevel>1.1) else binFillingLevel
+    
     return binFillingLevel
 
 
